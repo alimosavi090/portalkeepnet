@@ -43,9 +43,9 @@
   --chart-3: 165 65% 32%;
   --chart-4: 145 60% 30%;
   --chart-5: 125 55% 28%;
-  --font-sans: Open Sans, sans-serif;
+  --font-sans: Inter, Vazirmatn, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
+  --font-mono: 'Fira Code', monospace;
   --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(210 6% 12% / 0.02);
   --shadow-xs: 0px 2px 0px 0px hsl(210 6% 12% / 0.04);
