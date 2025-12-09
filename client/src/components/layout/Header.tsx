@@ -4,25 +4,25 @@ import { useTheme } from '@/lib/theme';
 import { useLanguage } from '@/lib/language';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Sun, 
-  Moon, 
-  Globe, 
-  Menu, 
-  X, 
-  Shield, 
-  Home, 
-  Layers, 
-  BookOpen, 
-  MessageCircle, 
-  Bell, 
-  LogOut 
+import {
+  Sun,
+  Moon,
+  Globe,
+  Menu,
+  X,
+  Shield,
+  Home,
+  Layers,
+  BookOpen,
+  MessageCircle,
+  Bell,
+  LogOut
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,7 @@ export function Header() {
     { href: '/tutorials', label: t('nav.tutorials'), icon: BookOpen },
     { href: '/bot-guide', label: t('nav.botGuide'), icon: MessageCircle },
     { href: '/announcements', label: t('nav.announcements'), icon: Bell },
+    { href: '/contact', label: t('nav.contact'), icon: MessageCircle },
   ];
 
   const isActive = (href: string) => {
@@ -92,8 +93,8 @@ export function Header() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   data-testid="button-language-toggle"
                   aria-label="Change language"
@@ -102,14 +103,14 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align={isRTL ? 'start' : 'end'}>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => language !== 'en' && toggleLanguage()}
                   className={cn(language === 'en' && 'bg-accent')}
                   data-testid="menu-item-english"
                 >
                   English
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => language !== 'fa' && toggleLanguage()}
                   className={cn(language === 'fa' && 'bg-accent')}
                   data-testid="menu-item-persian"
@@ -119,13 +120,8 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="hidden md:flex items-center gap-2">
-                <Link href="/admin">
-                  <Button variant="outline" size="sm" data-testid="button-admin-panel">
-                    {t('admin.title')}
-                  </Button>
-                </Link>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -136,12 +132,6 @@ export function Header() {
                   <LogOut className="h-5 w-5" />
                 </Button>
               </div>
-            ) : (
-              <Link href="/admin/login" className="hidden md:block">
-                <Button variant="outline" size="sm" data-testid="button-admin-login">
-                  {t('nav.admin')}
-                </Button>
-              </Link>
             )}
 
             <Button
@@ -177,41 +167,18 @@ export function Header() {
                   </Button>
                 </Link>
               ))}
-              {isAuthenticated ? (
-                <>
-                  <Link href="/admin">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Shield className="h-4 w-4" />
-                      {t('admin.title')}
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-destructive"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t('nav.logout')}
-                  </Button>
-                </>
-              ) : (
-                <Link href="/admin/login">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Shield className="h-4 w-4" />
-                    {t('nav.admin')}
-                  </Button>
-                </Link>
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 text-destructive"
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {t('nav.logout')}
+                </Button>
               )}
             </div>
           </nav>

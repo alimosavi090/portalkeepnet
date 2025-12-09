@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Shield, Heart } from 'lucide-react';
 import { SiTelegram } from 'react-icons/si';
+import { contactConfig, getContactUrls } from '@/config/contact';
 
 export function Footer() {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const urls = getContactUrls();
 
   return (
     <footer className="border-t border-border bg-card mt-auto">
@@ -17,14 +19,14 @@ export function Footer() {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://t.me/"
+              href={urls.telegramChannel}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-telegram"
             >
               <SiTelegram className="h-5 w-5" />
-              <span className="text-sm">Telegram Channel</span>
+              <span className="text-sm">{contactConfig.telegram.channel}</span>
             </a>
           </div>
 

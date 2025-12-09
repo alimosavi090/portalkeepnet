@@ -41,11 +41,13 @@ export const tutorials = pgTable("tutorials", {
   contentEn: text("content_en"),
   contentFa: text("content_fa"),
   videoUrl: text("video_url"),
+  images: text("images").array(),
   platformId: integer("platform_id").references(() => platforms.id, { onDelete: "set null" }),
   appId: integer("app_id").references(() => applications.id, { onDelete: "set null" }),
   order: integer("order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
 
 export const announcements = pgTable("announcements", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -82,10 +84,19 @@ export const tutorialsRelations = relations(tutorials, ({ one }) => ({
   }),
 }));
 
-export const insertAdminSchema = createInsertSchema(admins).omit({ id: true, createdAt: true });
+export const insertAdminSchema = createInsertSchema(admins, {
+  username: z.string().min(3),
+  password: z.string().min(6),
+}).omit({ id: true, createdAt: true });
+
 export const insertPlatformSchema = createInsertSchema(platforms).omit({ id: true, createdAt: true });
+
 export const insertApplicationSchema = createInsertSchema(applications).omit({ id: true, createdAt: true });
-export const insertTutorialSchema = createInsertSchema(tutorials).omit({ id: true, createdAt: true });
+
+export const insertTutorialSchema = createInsertSchema(tutorials, {
+  images: z.array(z.string()).optional(),
+}).omit({ id: true, createdAt: true });
+
 export const insertAnnouncementSchema = createInsertSchema(announcements).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;

@@ -10,9 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoadingPage } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
-import { 
-  BookOpen, 
-  Video, 
+import {
+  BookOpen,
+  Video,
   FileText,
   ArrowLeft,
   Wrench
@@ -83,8 +83,29 @@ export default function Tutorials() {
               </div>
             )}
 
+            {tutorial.images && tutorial.images.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">{t('tutorials.images')}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {tutorial.images.map((imageUrl, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-video rounded-lg overflow-hidden border border-border bg-muted"
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`${title} - Image ${index + 1}`}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {content && (
-              <div 
+              <div
                 className="prose prose-neutral dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: content }}
                 data-testid="tutorial-content"
@@ -156,10 +177,20 @@ export default function Tutorials() {
 
 function TutorialCard({ tutorial, language }: { tutorial: Tutorial; language: string }) {
   const { t } = useTranslation();
-  
+
   return (
     <Link href={`/tutorials/${tutorial.id}`}>
       <Card className="hover-elevate cursor-pointer h-full" data-testid={`card-tutorial-${tutorial.id}`}>
+        {tutorial.images && tutorial.images.length > 0 && (
+          <div className="aspect-video overflow-hidden">
+            <img
+              src={tutorial.images[0]}
+              alt={language === 'fa' ? tutorial.titleFa : tutorial.titleEn}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
         <CardContent className="p-6">
           <Badge variant="outline" className="mb-3">
             {tutorial.type === 'video' ? (

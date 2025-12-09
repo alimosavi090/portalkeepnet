@@ -1,14 +1,27 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, Request, Response, NextFunction } from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import rateLimit from "express-rate-limit";
+import cors from "cors";
+import helmet from "helmet";
+import { pool } from "./db";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import { upload, deleteFile, getFileUrl } from "./upload";
+import { log } from "./logger";
 import {
   insertPlatformSchema,
   insertApplicationSchema,
   insertTutorialSchema,
   insertAnnouncementSchema,
 } from "@shared/schema";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 declare module "express-session" {
   interface SessionData {
@@ -27,12 +40,51 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  if (!process.env.SESSION_SECRET) {
-    console.warn("SESSION_SECRET not set, using fallback - this is insecure in production!");
+  // Security: Enforce SESSION_SECRET in production
+  if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET must be set in production!");
   }
-  
+
+  if (!process.env.SESSION_SECRET) {
+    log.warn("SESSION_SECRET not set, using fallback - this is insecure in production!");
+  }
+
+  // Security: Helmet for security headers
+  app.use(helmet({
+    contentSecurityPolicy: false, // Disable for now, can be configured later
+  }));
+
+  // Security: CORS
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*",
+    credentials: true,
+  }));
+
+  // Security: Rate limiting
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+  });
+  app.use("/api/", limiter);
+
+  // Stricter rate limit for auth endpoints
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5, // 5 login attempts per 15 minutes
+    message: "Too many login attempts, please try again later.",
+  });
+
+  // Session store
+  const PgSession = connectPgSimple(session);
+
   app.use(
     session({
+      store: new PgSession({
+        pool,
+        tableName: "session",
+        createTableIfMissing: true,
+      }),
       secret: process.env.SESSION_SECRET || "vpn-support-secret-key-dev-only",
       resave: false,
       saveUninitialized: false,
@@ -45,7 +97,13 @@ export async function registerRoutes(
     })
   );
 
-  app.post("/api/v1/auth/login", async (req, res) => {
+  // Health check endpoint
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Auth endpoints with rate limiting
+  app.post("/api/v1/auth/login", authLimiter, async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
@@ -63,8 +121,10 @@ export async function registerRoutes(
       }
 
       req.session.adminId = admin.id;
+      log.info(`Admin logged in: ${admin.username}`, { adminId: admin.id });
       res.json({ id: admin.id, username: admin.username });
-    } catch (error) {
+    } catch (error: any) {
+      log.error("Login failed", { error: error.message });
       res.status(500).json({ error: "Login failed" });
     }
   });
@@ -367,19 +427,51 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/v1/seed-admin", async (req, res) => {
+  // Upload endpoints
+  app.post("/api/v1/upload/image", requireAuth, upload.single("image"), async (req, res) => {
     try {
-      const existingAdmin = await storage.getAdminByUsername("admin");
-      if (existingAdmin) {
-        return res.json({ message: "Admin already exists", id: existingAdmin.id });
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
       }
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      const admin = await storage.createAdmin({ username: "admin", password: hashedPassword });
-      res.status(201).json({ message: "Admin created", id: admin.id });
+
+      const fileUrl = getFileUrl(req.file.filename);
+      log.info(`Image uploaded: ${req.file.filename}`, { adminId: req.session.adminId });
+
+      res.status(201).json({
+        filename: req.file.filename,
+        url: fileUrl,
+        size: req.file.size,
+      });
     } catch (error) {
-      res.status(500).json({ error: "Failed to seed admin" });
+      log.error("Image upload failed", { error, adminId: req.session.adminId });
+      res.status(500).json({ error: "Failed to upload image" });
     }
   });
+
+  app.delete("/api/v1/upload/image/:filename", requireAuth, async (req, res) => {
+    try {
+      const { filename } = req.params;
+
+      // Security: prevent path traversal
+      if (filename.includes("..") || filename.includes("/")) {
+        return res.status(400).json({ error: "Invalid filename" });
+      }
+
+      const deleted = deleteFile(filename);
+      if (deleted) {
+        log.info(`Image deleted: ${filename}`, { adminId: req.session.adminId });
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "File not found" });
+      }
+    } catch (error) {
+      log.error("Image deletion failed", { error, adminId: req.session.adminId });
+      res.status(500).json({ error: "Failed to delete image" });
+    }
+  });
+
+  // Serve uploaded files
+  app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
   return httpServer;
 }

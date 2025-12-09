@@ -13,6 +13,7 @@ import Platforms from "@/pages/Platforms";
 import Tutorials from "@/pages/Tutorials";
 import BotGuide from "@/pages/BotGuide";
 import Announcements from "@/pages/Announcements";
+import Contact from "@/pages/Contact";
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import NotFound from "@/pages/not-found";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/tutorials/:id" component={Tutorials} />
       <Route path="/bot-guide" component={BotGuide} />
       <Route path="/announcements" component={Announcements} />
+      <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/:section" component={AdminDashboard} />

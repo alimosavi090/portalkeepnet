@@ -39,6 +39,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, BookOpen, Loader2, Video, FileText } from 'lucide-react';
+import { ImageUploader } from '@/components/ui/image-uploader';
 import type { Tutorial, InsertTutorial, Platform, Application } from '@shared/schema';
 
 const typeOptions = ['text', 'video'] as const;
@@ -62,6 +63,7 @@ export default function AdminTutorials() {
     contentEn: '',
     contentFa: '',
     videoUrl: '',
+    images: [],
     platformId: null,
     appId: null,
     order: 0,
@@ -132,6 +134,7 @@ export default function AdminTutorials() {
       contentEn: '',
       contentFa: '',
       videoUrl: '',
+      images: [],
       platformId: null,
       appId: null,
       order: 0,
@@ -149,6 +152,7 @@ export default function AdminTutorials() {
       contentEn: tutorial.contentEn || '',
       contentFa: tutorial.contentFa || '',
       videoUrl: tutorial.videoUrl || '',
+      images: tutorial.images || [],
       platformId: tutorial.platformId,
       appId: tutorial.appId,
       order: tutorial.order,
@@ -428,6 +432,16 @@ export default function AdminTutorials() {
                   data-testid="input-tutorial-order"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tutorial Images</Label>
+              <ImageUploader
+                images={formData.images || []}
+                onImagesChange={(images) => setFormData({ ...formData, images })}
+                maxImages={5}
+                disabled={isPending}
+              />
             </div>
 
             <DialogFooter>
