@@ -4,6 +4,13 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 
 const app = express();
+
+// --- تغییر حیاتی برای حل مشکل لاگین پشت کلادفلر ---
+// این خط به Express میگه که پشت یک پروکسی (مثل Nginx یا Cloudflare) هست
+// و باید به هدرهای امنیتی (X-Forwarded-Proto) اعتماد کنه تا کوکی‌های Secure درست کار کنن.
+app.set("trust proxy", 1);
+// --------------------------------------------------
+
 const httpServer = createServer(app);
 
 declare module "http" {

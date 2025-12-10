@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: keepnet_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: secure_datavault
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  app:
+    build: .
+    container_name: keepnet_app
+    restart: always
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      # اینجا رو تغییر دادیم به production تا کش فعال بشه و سرعت بره بالا
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/secure_datavault
+      - SESSION_SECRET=YeMatneKheiliToolaniVaRandomKeBayadTaghyirBedi12345
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      # فقط پوشه آپلود رو وصل می‌کنیم (کدها رو از ایمیج می‌خونه که سریعتره)
+      - ./uploads:/app/uploads
+    depends_on:
+      - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pgdata:
