@@ -1,0 +1,55 @@
+Objective: Design and implement a highly flexible, secure, and user-friendly web application using Go (for the backend) to serve as a comprehensive support and content delivery platform for a Telegram-based VPN/V2Ray sales channel. The application must be scalable and easily upgradeable.
+
+Technical Stack & Requirements:
+
+Backend Language: Go (Golang) for high performance and concurrency.
+
+Database: (SQLITE) for flexible content and admin data management.
+
+Architecture: Must support future upgrades and API extensions (e.g., using a RESTful API approach).
+
+Admin Credentials Security: Admin username and password MUST NOT be hardcoded. Use secure methods (like environment variables and database hashing) for credential storage and authentication.
+
+Feature Set - User Frontend (Minimalistic & Intuitive):
+
+Homepage: Clean, minimal design. Must prominently display the two latest announcements/notifications.
+
+Multilingual Support: Full implementation for Persian (Farsi) and English.
+
+Theming: Toggle switch for Light Mode and Dark Mode.
+
+Content Organization:
+
+Dedicated sections for various Platforms (Android, iOS, Windows, etc.).
+
+Under each Platform, list available Applications and their Download Links.
+
+Instructional Content: Support for both text-based guides and embedded video tutorials (e.g., YouTube links).
+
+In-Depth Bot Tutorials: A specialized section for the Telegram bot, featuring multiple, detailed guides for all its various features (buying, renewal, configuration, etc.).
+
+Troubleshooting/Platform Optimization: Specific guides for each platform on configuration, bug fixing, and optimal VPN usage.
+
+Notifications Section: A dedicated, easily accessible page for the full archive of all announcements.
+
+Feature Set - Professional Admin Panel (High Security & Flexibility):
+
+Robust Authentication: Secure login with strong password hashing and session management.
+
+Security Management: Ability for the admin to change their username and password directly from the panel.
+
+Comprehensive Content Management (CRUD):
+
+Dynamic Platform/App Management: Add, edit, and delete Platforms, Applications, and their corresponding Download Links.
+
+Tutorial Management: Dedicated editor (with rich-text support) to create, categorize, and link text and video tutorials to specific apps/platforms.
+
+Notification Management: Create, edit, and delete announcements.
+
+Desired Output: Provide a detailed plan covering:
+
+Database Schema (Conceptual): Tables/Collections for Users (Admins), Platforms, Applications, Tutorials, and Notifications.
+
+Backend (Go) Architecture: Suggested package structure and core API endpoints (e.g., /api/v1/tutorials, /admin/login).
+
+Frontend (UI/UX) Wireframe Suggestions: Outline for the homepage, platform page, and admin dashboard focusing on the minimal design requirement.
