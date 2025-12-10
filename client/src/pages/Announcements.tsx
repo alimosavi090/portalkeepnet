@@ -11,6 +11,37 @@ import { Bell, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Announcement } from '@shared/schema';
 
+// --- تابع جدید برای تبدیل متن لینک‌دار به لینک واقعی ---
+const renderContentWithLinks = (text: string | null | undefined) => {
+  if (!text) return null;
+
+  // این الگو دنبال آدرس‌هایی میگرده که با http یا https شروع میشن
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  // متن رو تیکه تیکه میکنیم (لینک‌ها و متن‌های معمولی)
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    // اگه این تیکه شبیه لینک بود، داخل تگ <a> بذارش
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline font-medium break-all"
+          onClick={(e) => e.stopPropagation()} // جلوگیری از تداخل با کلیک کارت
+        >
+          {part}
+        </a>
+      );
+    }
+    // اگه متن معمولی بود، خودش رو برگردون
+    return part;
+  });
+};
+
 export default function Announcements() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -58,13 +89,15 @@ export default function Announcements() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div 
-                    className="prose prose-neutral dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ 
-                      __html: language === 'fa' ? announcement.contentFa : announcement.contentEn 
-                    }}
+                  <div
+                    className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-wrap"
                     data-testid={`content-announcement-${announcement.id}`}
-                  />
+                  >
+                    {/* استفاده از تابع جدید برای نمایش متن */}
+                    {renderContentWithLinks(
+                      language === 'fa' ? announcement.contentFa : announcement.contentEn
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

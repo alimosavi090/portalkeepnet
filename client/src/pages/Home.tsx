@@ -133,7 +133,8 @@ export default function Home() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground line-clamp-3">
+                    {/* --- تغییر اصلی اینجا انجام شد: اضافه شدن whitespace-pre-wrap --- */}
+                    <p className="text-muted-foreground whitespace-pre-wrap">
                       {language === 'fa' ? announcement.contentFa : announcement.contentEn}
                     </p>
                     <Link href="/announcements">
